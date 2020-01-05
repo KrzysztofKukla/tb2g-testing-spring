@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {BaseConfig.class, LaurelConfig.class})
-class HearingInterpreterIT {
+class HearingInterpreterLaurelIT {
 
     @Autowired
     private HearingInterpreter hearingInterpreter;

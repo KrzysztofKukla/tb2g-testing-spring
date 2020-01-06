@@ -14,9 +14,9 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
  */
 
 @ActiveProfiles("externalized")
-@SpringJUnitConfig(classes = HearingInterpreterPropertiesIT.TestConfig.class)
+@SpringJUnitConfig(classes = HearingInterpreterYannyPropertiesIT.TestConfig.class)
 @TestPropertySource(value = "classpath:yanny.properties")
-class HearingInterpreterPropertiesIT {
+class HearingInterpreterYannyPropertiesIT {
 
     @Autowired
     private HearingInterpreter hearingInterpreter;
@@ -29,7 +29,7 @@ class HearingInterpreterPropertiesIT {
 
     @Test
     void whatDoYouHear() {
-        Assertions.assertEquals("dupa", hearingInterpreter.whatDoYouHear());
+        Assertions.assertEquals("dupa yanny", hearingInterpreter.whatDoYouHear());
     }
 
 }

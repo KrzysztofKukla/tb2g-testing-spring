@@ -9,20 +9,16 @@ import org.springframework.stereotype.Component;
  * @author Krzysztof Kukla
  */
 @Component
-@Profile(value = "externalized")
+@Profile(value = {"externalized", "externalized-laurel"})
 @Primary
-public class PropertiesWordProducer implements  WordProducer{
+public class PropertiesWordProducer implements WordProducer {
 
+    @Value("${say.word}")
     private String word;
 
     @Override
     public String getWord() {
         return word;
-    }
-
-    @Value("${say.word}")
-    public void setWord(String word) {
-        this.word = word;
     }
 
 }

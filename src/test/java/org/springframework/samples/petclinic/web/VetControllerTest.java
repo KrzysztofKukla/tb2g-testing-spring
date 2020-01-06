@@ -1,9 +1,9 @@
 package org.springframework.samples.petclinic.web;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,13 +16,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * @author Krzysztof Kukla
@@ -53,8 +49,8 @@ class VetControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/vets.html"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.view().name("vets/vetList"));
-//            .andExpect(MockMvcResultMatchers.model().attribute(anyString(),any(Vets.class)));
+            .andExpect(MockMvcResultMatchers.view().name("vets/vetList"))
+            .andExpect(MockMvcResultMatchers.model().attribute("vets", Matchers.any(Vets.class)));
         BDDMockito.then(clinicService).should().findVets();
 //        BDDMockito.then(model).should().put(ArgumentMatchers.anyString(), ArgumentMatchers.any(Vets.class));
     }

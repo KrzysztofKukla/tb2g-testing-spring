@@ -61,10 +61,22 @@ class OwnerControllerTest {
 
     @Test
     void processCreationFormBindingResultErrors() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/owners/new"))
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("firstName", "firstName");
+        params.add("lastName", "lastName");
+//        params.add("address", "address");
+        params.add("city", "city");
+        params.add("telephone", "wrong_number");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/new")
+            .params(params))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("owners/createOrUpdateOwnerForm"))
-            .andExpect(MockMvcResultMatchers.model().hasErrors());
+            .andExpect(MockMvcResultMatchers.model().hasErrors())
+            .andExpect(MockMvcResultMatchers.model().attributeHasFieldErrors("owner", "address"))
+            .andExpect(MockMvcResultMatchers.model().attributeHasFieldErrors("owner", "telephone"));
+
+        BDDMockito.then(clinicService).shouldHaveZeroInteractions();
     }
 
     @Test

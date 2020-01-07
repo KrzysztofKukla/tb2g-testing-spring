@@ -28,6 +28,8 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
  * @author Krzysztof Kukla
@@ -70,7 +72,7 @@ class OwnerControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/owners/new")
             .params(params))
-            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("owners/createOrUpdateOwnerForm"))
             .andExpect(MockMvcResultMatchers.model().hasErrors())
             .andExpect(MockMvcResultMatchers.model().attributeHasFieldErrors("owner", "address"))
@@ -90,7 +92,7 @@ class OwnerControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/owners/new")
             .params(params))
-            .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
+            .andExpect(status().is3xxRedirection());
 
         BDDMockito.then(clinicService).should().saveOwner(any(Owner.class));
     }
@@ -114,7 +116,7 @@ class OwnerControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/owners")
             .param("lastName", "dupa") //.params binds 'lastName' field from Owner object
         )
-            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("owners/findOwners"));
 //        BDDMockito.then(bindingResult).should().rejectValue(anyString(), anyString(), anyString());
     }
@@ -129,7 +131,7 @@ class OwnerControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/owners")
             .param("lastName", owner.getLastName()))
-            .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+            .andExpect(status().is3xxRedirection())
             .andExpect(MockMvcResultMatchers.view().name("redirect:/owners/8"));
 
         BDDMockito.then(clinicService).should().findOwnerByLastName(owner.getLastName());
@@ -145,7 +147,7 @@ class OwnerControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/owners")
             .param("lastName", lastName))
-            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("owners/ownersList"));
 
         BDDMockito.then(clinicService).should().findOwnerByLastName(lastName);
@@ -154,9 +156,47 @@ class OwnerControllerTest {
     @Test
     void initCreationFormTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/owners/new"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("owners/createOrUpdateOwnerForm"))
             .andExpect(MockMvcResultMatchers.model().attribute("owner", Matchers.any(Owner.class)));
+    }
+
+    @Test
+    void processUpdateOwnerFormHasErrors() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("firstName", "firstName");
+//        params.add("lastName", "lastName");
+        params.add("address", "address");
+//        params.add("city", "city");
+        params.add("telephone", "123456");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/1/edit")
+            .params(params))
+            .andExpect(status().isOk())
+            .andExpect(view().name(OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM))
+            .andExpect(MockMvcResultMatchers.model().hasErrors())
+            .andExpect(MockMvcResultMatchers.model().attributeHasFieldErrors("owner", "lastName", "city"));
+
+        BDDMockito.then(clinicService).shouldHaveZeroInteractions();
+    }
+
+    @Test
+    void processUpdateOwnerFormNoErrors() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("id", "1");
+        params.add("firstName", "firstName");
+        params.add("lastName", "lastName");
+        params.add("address", "address");
+        params.add("city", "city");
+        params.add("telephone", "123456");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/{ownerId}/edit", 1)
+            .params(params))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(view().name("redirect:/owners/{ownerId}")) //resolution for {ownerId}
+            .andExpect(MockMvcResultMatchers.model().hasNoErrors());
+
+        BDDMockito.then(clinicService).should().saveOwner(any(Owner.class));
     }
 
 }

@@ -18,12 +18,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 /**
@@ -54,6 +57,30 @@ class OwnerControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(ownerController).build();
 
+    }
+
+    @Test
+    void processCreationFormBindingResultErrors() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/new"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("owners/createOrUpdateOwnerForm"))
+            .andExpect(MockMvcResultMatchers.model().hasErrors());
+    }
+
+    @Test
+    void processCreationFormBindingResultNoErrors() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("firstName", "firstName");
+        params.add("lastName", "lastName");
+        params.add("address", "address");
+        params.add("city", "city");
+        params.add("telephone", "123456");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/new")
+            .params(params))
+            .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
+
+        BDDMockito.then(clinicService).should().saveOwner(any(Owner.class));
     }
 
     //Captor for lastName used here
